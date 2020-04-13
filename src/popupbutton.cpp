@@ -69,15 +69,28 @@ void PopupButton::perform_layout(NVGcontext *ctx) {
     const Window *parent_window = window();
 
     int anchor_size = m_popup->anchor_size();
+    Vector2i abs_position = absolute_position();
 
     if (parent_window) {
-        int pos_y = absolute_position().y() - parent_window->position().y() + m_size.y() / 2;
+        int pos_y = abs_position.y() - parent_window->position().y() + m_size.y() / 2;
         if (m_popup->side() == Popup::Right)
             m_popup->set_anchor_pos(Vector2i(parent_window->width() + anchor_size, pos_y));
         else
             m_popup->set_anchor_pos(Vector2i(-anchor_size, pos_y));
     } else {
-        m_popup->set_position(absolute_position() + Vector2i(width() + anchor_size + 1,  m_size.y() / 2 - anchor_size));
+        Vector2i anchor_pos = abs_position;
+        if (m_popup->side() == Popup::Right)
+            anchor_pos[0] += width() + anchor_size + 1;
+        else
+            anchor_pos[0] -= anchor_size;
+        anchor_pos[1] += m_size.y() / 2;
+        m_popup->set_anchor_pos(anchor_pos);
+
+        const Screen *parent_screen = screen();
+        if (anchor_pos.y() - m_popup->anchor_offset() + m_popup->size().y() > parent_screen->size().y()) {
+            // Move popup inside of screen
+            m_popup->set_anchor_offset(abs_position.y() + m_size.y() / 2 - parent_screen->size().y() + m_popup->size().y());
+        }
     }
 }
 

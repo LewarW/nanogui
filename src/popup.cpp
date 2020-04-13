@@ -33,11 +33,13 @@ void Popup::perform_layout(NVGcontext *ctx) {
 }
 
 void Popup::refresh_relative_placement() {
-    if (!m_parent_window)
-        return;
-    m_parent_window->refresh_relative_placement();
-    m_visible &= m_parent_window->visible_recursive();
-    m_pos = m_parent_window->position() + m_anchor_pos - Vector2i(0, m_anchor_offset);
+    if (m_parent_window) {
+        m_parent_window->refresh_relative_placement();
+        m_visible &= m_parent_window->visible_recursive();
+        m_pos = m_parent_window->position() + m_anchor_pos - Vector2i(0, m_anchor_offset);
+    } else {
+        m_pos = m_anchor_pos - Vector2i(0, m_anchor_offset);
+    }
 }
 
 void Popup::draw(NVGcontext* ctx) {
